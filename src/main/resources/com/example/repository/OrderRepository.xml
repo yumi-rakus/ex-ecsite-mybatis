@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.repository.OrderRepository">
+
+	<!-- ResultMap -->
+	<!-- ********** Order ********** -->
+	<resultMap type="com.example.domain.Order" id="orderResultMap">
+		<id property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="status" column="status" />
+		<result property="totalPrice" column="total_price" />
+		<result property="orderDate" column="order_date" />
+		<result property="destinationName" column="destination_name" />
+		<result property="destinationEmail" column="destination_email" />
+		<result property="destinationZipcode" column="destination_zipcode" />
+		<result property="destinationAddress" column="destination_address" />
+		<result property="destinationTel" column="destination_tel" />
+		<result property="deliveryTime" column="delivery_time" />
+		<result property="paymentMethod" column="payment_method" />
+
+		<collection property="orderItemList" column="id" javaType="ArrayList"
+			select="findOrderItem"></collection>
+	</resultMap>
+
+	<!-- ********** OrderItem ********** -->
+	<resultMap type="com.example.domain.OrderItem" id="orderItemResultMap">
+		<id property="id" column="orditem_id" />
+		<result property="itemId" column="orditem_itemId" />
+		<result property="orderId" column="orditem_orderId" />
+		<result property="quantity" column="orditem_quantity" />
+		<result property="size" column="orditem_size" />
+
+		<association property="item" column="orditem_itemId"
+			javaType="com.example.domain.Item" select="findItem">
+		</association>
+
+		<collection property="orderToppingList" column="orditem_id" javaType="ArrayList"
+			select="findOrderTopping"></collection>
+	</resultMap>
+
+	<!-- ********** Item ********** -->
+	<resultMap type="com.example.domain.Item" id="itemResultMap">
+		<id property="id" column="item_id" />
+		<result property="name" column="item_name" />
+		<result property="description" column="item_description" />
+		<result property="priceM" column="item_pricem" />
+		<result property="priceL" column="item_pricel" />
+		<result property="imagePath" column="item_imagepath" />
+		<result property="deleted" column="item_deleted" />
+	</resultMap>
+
+	<!-- ********** OrderTopping ********** -->
+	<resultMap type="com.example.domain.OrderTopping" id="orderToppingResultMap">
+		<id property="id" column="ordtop_id" />
+		<result property="toppingId" column="ordtop_toppingId" />
+		<result property="orderItemId" column="ordtop_orderItemId" />
+
+		<association property="topping" column="ordtop_toppingId"
+			javaType="com.example.domain.Topping" select="findTopping">
+		</association>
+	</resultMap>
+
+	<!-- ********** Topping ********** -->
+	<resultMap type="com.example.domain.Topping" id="toppingResultMap">
+		<id property="id" column="top_id" />
+		<result property="name" column="top_name" />
+		<result property="priceM" column="top_pricem" />
+		<result property="priceL" column="top_pricel" />
+	</resultMap>
+
+	<!-- SELECT -->
+	<select id="findTopping" resultMap="toppingResultMap">
+		SELECT
+		top.id AS top_id,
+		top.name AS top_name,
+		top.price_m AS top_pricem,
+		top.price_l AS top_pricel
+		FROM
+		toppings AS top
+		<where>
+			top.id = #{ordtop_toppingId}
+		</where>
+	</select>
+
+	<select id="findOrderTopping" resultMap="orderToppingResultMap">
+		SELECT
+		ordtop.id AS ordtop_id,
+		ordtop.topping_id AS ordtop_toppingId,
+		ordtop.order_item_id AS
+		ordtop_orderItemId
+		FROM
+		order_toppings AS ordtop
+		<where>
+			ordtop.order_item_id = #{orditem_id}
+		</where>
+		ORDER BY
+		ordtop.id
+	</select>
+
+	<select id="findItem" resultMap="itemResultMap">
+		SELECT
+		item.id AS item_id,
+		item.name AS item_name,
+		item.description AS item_description,
+		item.price_m
+		AS item_pricem,
+		item.price_l AS item_pricel,
+		item.image_path AS item_imagepath,
+		item.deleted AS
+		item_deleted
+		FROM
+		items AS item
+		<where>
+			item.id = #{orditem_itemId}
+		</where>
+	</select>
+
+	<select id="findOrderItem" resultMap="orderItemResultMap">
+		SELECT
+		orditem.id AS orditem_id,
+		orditem.item_id AS orditem_itemId,
+		orditem.order_id AS
+		orditem_orderId,
+		orditem.quantity AS orditem_quantity,
+		orditem.size AS orditem_size
+		FROM
+		order_items
+		AS orditem
+		<where>
+			orditem.order_id = #{id}
+		</where>
+		ORDER BY
+		orditem.id DESC
+	</select>
+
+	<!-- //////////////////////////////////////////////////////////////////////// -->
+	<select id="findByUserIdByStatus0" resultMap="orderResultMap">
+		SELECT
+		id,
+		user_id,
+		status,
+		total_price,
+		order_date,
+		destination_name,
+		destination_email,
+		destination_zipcode,
+		destination_address,
+		destination_tel,
+		delivery_time,
+		payment_method
+		FROM
+		orders
+		<where>
+			user_id = #{userId}
+			AND
+			status = 0
+		</where>
+	</select>
+
+	<select id="existsByStatus0ByUserId" resultType="Integer">
+		SELECT
+		count(*)
+		FROM
+		orders
+		<where>
+			status = 0
+			AND
+			user_id = #{userId}
+		</where>
+	</select>
+
+	<select id="findOrderIdByUserIdByStatus0" resultType="Integer">
+		SELECT
+		id
+		FROM
+		orders
+		<where>
+			status = 0
+			AND
+			user_id = #{userId}
+		</where>
+	</select>
+
+	<select id="findByUserIdByStatusNot0" resultMap="orderResultMap">
+		SELECT
+		id,
+		user_id,
+		status,
+		total_price,
+		order_date,
+		destination_name,
+		destination_email,
+		destination_zipcode,
+		destination_address,
+		destination_tel,
+		delivery_time,
+		payment_method
+		FROM
+		orders
+		<where>
+			user_id = #{userId}
+			AND
+			status &lt;&gt; 0
+		</where>
+		ORDER BY
+		id DESC
+	</select>
+
+	<!-- INSERT -->
+	<insert id="insertOrder" parameterType="com.example.domain.Order" useGeneratedKeys="true"
+		keyProperty="id">
+		INSERT INTO
+		orders (
+		user_id,
+		status,
+		total_price
+		) VALUES (
+		#{userId},
+		#{status},
+		#{totalPrice}
+		)
+	</insert>
+
+	<!-- UPDATE -->
+	<update id="updateTotalPriceByUserIdByStatus0">
+		UPDATE
+		orders
+		SET
+		total_price = #{totalPrice}
+		<where>
+			status = 0
+			AND
+			user_id = #{userId}
+		</where>
+	</update>
+
+	<update id="updateOrderByUserIdByStatus0" parameterType="com.example.domain.Order">
+		UPDATE
+		orders
+		SET
+		status = #{status},
+		order_date = #{orderDate},
+		destination_name = #{destinationName},
+		destination_email = #{destinationEmail},
+		destination_zipcode = #{destinationZipcode},
+		destination_address = #{destinationAddress},
+		destination_tel = #{destinationTel},
+		delivery_time =
+		#{deliveryTime},
+		payment_method = #{paymentMethod}
+		<where>
+			user_id = #{userId}
+			AND
+			status = 0
+		</where>
+	</update>
+
+	<update id="updateOrderId">
+		UPDATE
+		order_items
+		SET
+		order_id = #{userOrderId}
+		<where>
+			order_id = #{uuidOrderId}
+		</where>
+	</update>
+
+	<update id="updateUserId">
+		UPDATE
+		orders
+		SET
+		user_id = #{userId}
+		<where>
+			user_id = #{uuid}
+			AND
+			status = 0
+		</where>
+	</update>
+
+	<!-- DELETE -->
+	<delete id="deleteUuidRecordByUuid">
+		DELETE FROM
+		orders
+		<where>
+			status = 0
+			AND
+			user_id = #{uuid}
+		</where>
+	</delete>
+
+</mapper>

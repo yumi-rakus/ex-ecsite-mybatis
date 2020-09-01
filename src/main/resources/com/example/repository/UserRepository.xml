@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.repository.UserRepository">
+
+	<!-- ResultMap -->
+	<resultMap id="userResultMap" type="com.example.domain.User">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="email" column="email" />
+		<result property="password" column="password" />
+		<result property="zipcode" column="zipcode" />
+		<result property="address" column="address" />
+		<result property="telephone" column="telephone" />
+	</resultMap>
+
+	<!-- SELECT -->
+	<select id="existEmail" resultType="Integer">
+		SELECT
+		count(*)
+		FROM
+		users
+		<where>
+			email = #{email}
+		</where>
+	</select>
+
+	<select id="findByEmail" resultMap="userResultMap">
+		SELECT
+		id,
+		name,
+		email,
+		password,
+		zipcode,
+		address,
+		telephone
+		FROM
+		users
+		<where>
+			email = #{email}
+		</where>
+	</select>
+
+	<select id="findById" resultMap="userResultMap">
+		SELECT
+		id,
+		name,
+		email,
+		password,
+		zipcode,
+		address,
+		telephone
+		FROM
+		users
+		<where>
+			id = #{id}
+		</where>
+	</select>
+
+	<!-- INSERT -->
+	<insert id="insert" parameterType="com.example.domain.User">
+		INSERT INTO
+		users (
+		name,
+		email,
+		password,
+		zipcode,
+		address,
+		telephone
+		) VALUES (
+		#{name},
+		#{email},
+		#{password},
+		#{zipcode},
+		#{address},
+		#{telephone}
+		)
+	</insert>
+
+</mapper>

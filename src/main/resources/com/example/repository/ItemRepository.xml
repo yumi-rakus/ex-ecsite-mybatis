@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.repository.ItemRepository">
+
+	<!-- ResultMap -->
+	<resultMap id="itemResultMap" type="com.example.domain.Item">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="description" column="description" />
+		<result property="priceM" column="price_m" />
+		<result property="priceL" column="price_l" />
+		<result property="imagePath" column="image_path" />
+		<result property="deleted" column="deleted" />
+	</resultMap>
+
+	<!-- SELECT -->
+	<select id="findAll" resultMap="itemResultMap" parameterType="Integer">
+		SELECT
+		id,
+		name,
+		description,
+		price_m,
+		price_l,
+		image_path,
+		deleted
+		FROM
+		items
+		<where>
+			deleted = false
+		</where>
+		ORDER BY
+		id
+		LIMIT 9
+		OFFSET #{offset}
+	</select>
+
+	<select id="load" resultMap="itemResultMap" parameterType="Integer">
+		SELECT
+		id,
+		name,
+		description,
+		price_m,
+		price_l,
+		image_path,
+		deleted
+		FROM
+		items
+		<where>
+			id = #{id}
+		</where>
+	</select>
+
+	<select id="findByNameContainingByDeletedFalse" resultMap="itemResultMap">
+		SELECT
+		id,
+		name,
+		description,
+		price_m,
+		price_l,
+		image_path,
+		deleted
+		FROM
+		items
+		<where>
+			name LIKE '%' || #{name} || '%'
+			AND
+			deleted = false
+		</where>
+		LIMIT 9
+		OFFSET #{offset};
+	</select>
+
+	<select id="getNameList" resultType="String">
+		SELECT
+		name
+		FROM
+		items
+		<where>
+			name LIKE '%' || #{name} || '%'
+			AND
+			deleted = false
+		</where>
+		ORDER BY
+		id
+	</select>
+
+	<select id="getCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM
+		items
+		<where>
+			deleted = false
+		</where>
+	</select>
+
+	<select id="getSearchCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM
+		items
+		<where>
+			name LIKE '%' || #{name} || '%'
+			AND
+			deleted = false
+		</where>
+	</select>
+
+</mapper>
